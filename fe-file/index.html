@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<head>
+    <title>webview hybird</title>
+    <style>
+        body {
+            height: 100%;
+            background-color: pink;
+        }
+    </style>
+    <script src="./js/bridge.js"></script>
+    <script>
+        function call() {
+            const height = document.documentElement.clientHeight;
+            Bridge.exchangeHeight(height).then(
+                (result) => document.querySelector('#show').innerHTML = `widget height: ${result}`
+            ).catch(e => alert(e.message));
+        }
+    </script>
+</head>
+
+<body>
+    <section>
+        <button onclick="call()">js 调用 Flutter</button>
+        <h3 id="result"></h3>
+    </section>
+    <section>
+        <h3 id="show"></h3>
+    </section>
+</body>
+
+</html>
