@@ -18,8 +18,8 @@ class _MyAppState extends State<MyApp> {
   HybridWebview webView;
   final GlobalKey<HybridWebviewState> _globalKey = GlobalKey();
 
-  String jsValue = '';
-  String jaCallback = '';
+  String jsResult = '';
+  String jsCallback = '';
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
         callback: (String method, dynamic content) {
           if (method == 'jsCallFlutter') {
             setState(() {
-              jsValue = content;
+              jsResult = content;
             });
             _globalKey.currentState.channel
                 .invokeMethod('flutterCallback', 'I callback from Flutter');
@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
               color: Colors.blueGrey,
               child: Column(
                 children: <Widget>[
-                  Text(jsValue),
+                  Text(jsCallback),
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
@@ -58,8 +58,9 @@ class _MyAppState extends State<MyApp> {
                           .invokeMethod('flutterCallJs', [
                         'I from Flutter: ${new DateTime.now().millisecondsSinceEpoch}'
                       ]);
+                      print('fromJS ==========   $fromJS');
                       setState(() {
-                        jaCallback = fromJS;
+                        jsCallback = fromJS;
                       });
                     },
                   ),
@@ -69,7 +70,8 @@ class _MyAppState extends State<MyApp> {
                       height: 400,
                       child: webView,
                     ),
-                  )
+                  ),
+                  Text(jsResult),
                 ],
               ))),
     );
