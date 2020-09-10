@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - hybrid_webview_flutter (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - hybrid_webview_flutter (from `.symlinks/plugins/hybrid_webview_flutter/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  hybrid_webview_flutter:
+    :path: ".symlinks/plugins/hybrid_webview_flutter/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  hybrid_webview_flutter: de7155c3f31dd80ce0f46b8cb66e4c166a82cb51
+
+PODFILE CHECKSUM: f32fb4e7c14f8b3ca19a369d7be425dd9241af27
+
+COCOAPODS: 1.9.1

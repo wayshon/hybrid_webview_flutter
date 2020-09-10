@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:hybrid_webview_flutter/hybrid_webview_flutter.dart';
+import 'package:hybrid_webview_flutter/src/hybrid_webview.dart';
 
 void main() {
   runApp(MyApp());
@@ -14,32 +15,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  HybridWebview webView;
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await HybridWebviewFlutter.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    webView = HybridWebview(url: 'https://m.baidu.com');
   }
 
   @override
@@ -49,9 +30,15 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
-        ),
+        body: Container(
+            color: Colors.blueGrey,
+            child: Center(
+              child: Container(
+                width: 200,
+                height: 400,
+                child: webView,
+              ),
+            )),
       ),
     );
   }
