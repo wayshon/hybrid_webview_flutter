@@ -52,7 +52,7 @@
             NSLog(@"%@ ===========", values);
         };
         _context[@"jsCallback"] = ^(JSValue *values) {
-            
+            NSLog(@"%@ ===========", values);
         };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
@@ -88,7 +88,10 @@
 
 
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)results{
-    if ([[call method] isEqualToString:@"load"]) {
+    if ([[call method] isEqualToString:@"flutterCallJs"]) {
+        [_context[@"flutterCallJs"] callWithArguments:@[call.arguments, ^(JSValue *value) {
+            NSLog(@"=====   %@", value);
+        }]];
     }
 }
 
