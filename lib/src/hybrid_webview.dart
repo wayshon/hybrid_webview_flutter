@@ -6,25 +6,23 @@ import 'package:flutter/services.dart';
 
 @immutable
 class HybridWebview extends StatefulWidget {
-  //加载的网页 URL
+  // 加载的网页 URL
   final String url;
+  // 来自 webview 的消息
+  final Function(int code, String message, dynamic content) callback;
 
   HybridWebview({
     //webview 加载网页链接
-    this.url,
+    @required this.url,
+    this.callback,
   });
 
   @override
-  State<StatefulWidget> createState() {
-    return HybridWebviewState(url);
-  }
+  State<StatefulWidget> createState() => new HybridWebviewState();
 }
 
 class HybridWebviewState extends State<HybridWebview> {
-  //加载的网页 URL
-  String url;
-
-  HybridWebviewState(this.url);
+  MethodChannel _channel;
 
   @override
   void initState() {
@@ -53,10 +51,37 @@ class HybridWebviewState extends State<HybridWebview> {
       //参数初始化
       creationParams: {
         //调用view参数标识
-        "url": url,
+        "url": widget.url,
       },
       //参数的编码方式
       creationParamsCodec: const StandardMessageCodec(),
+      //webview 创建后的回调
+      onPlatformViewCreated: (id) {
+        print("onPlatformViewCreated " + id.toString());
+        //创建通道
+        _channel = new MethodChannel('com.flutter_to_native_webview_$id');
+        //设置监听
+        nativeMessageListener();
+      },
     );
+  }
+
+  void nativeMessageListener() async {
+    _channel.setMethodCallHandler((resultCall) {
+      //处理原生 Android iOS 发送过来的消息
+      MethodCall call = resultCall;
+      //String method = call.method;
+      Map arguments = call.arguments;
+
+      int code = arguments["code"];
+      String message = arguments["message"];
+      dynamic content = arguments["content"];
+      print(
+          'code: ${code.toString()}; message: ${message.toString()}; content: ${content.toString()}');
+
+      if (widget.callback != null) {
+        widget.callback(code, message, content);
+      }
+    });
   }
 }

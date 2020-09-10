@@ -20,6 +20,7 @@
     FlutterMethodChannel* _channel;
     BOOL htmlImageIsClick;
     NSMutableArray* mImageUrlArray;
+    JSContext *_context;
 }
 
 -(instancetype)initWithWithFrame:(CGRect)frame viewIdentifier:(int64_t)viewId arguments:(id)args binaryMessenger:(NSObject<FlutterBinaryMessenger> *)messenger{
@@ -32,11 +33,25 @@
         _webView.scrollView.delegate = self;
         _viewId = viewId;
         
+        //创建context
+        _context = [_webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
+        //设置异常处理
+        _context.exceptionHandler = ^(JSContext *context, JSValue *exception) {
+            [JSContext currentContext].exception = exception;
+            NSLog(@"exception:%@",exception);
+        };
+        
         //接收 初始化参数
         NSDictionary *dic = args;
         NSString *url = [dic valueForKey:@"url"];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
         [_webView loadRequest:request];
+        
+//        js 注入与回调 block
+        _context[@"callOCOnLoad"] = ^() {
+            NSLog(@"window onload ========================== ");
+        };
+        [_context evaluateScript:@"window.onload = function(){callOCOnLoad()}"];
         
         // 注册flutter 与 ios 通信通道
         NSString* channelName = [NSString stringWithFormat:@"com.calcbit.hybridWebview_%lld", viewId];
@@ -51,9 +66,31 @@
     
 }
 
+- (void)webViewDidFinishLoad:(UIWebView *)webView{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
+    [dict setObject:@"webViewDidFinishLoad" forKey:@"message"];
+    [self sendMessage:dict];
+}
+
+-(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSNumber numberWithInt:500] forKey:@"code"];
+    [dict setObject:@"didFailLoadWithError" forKey:@"message"];
+    [self sendMessage:dict];
+}
+
+
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)results{
     if ([[call method] isEqualToString:@"load"]) {
     }
+}
+
+-(void)sendMessage:(NSDictionary *)dict{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // UI更新代码
+        [self->_channel invokeMethod:@"ios" arguments:dict];
+    });
 }
 
 
