@@ -70,27 +70,20 @@
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
     [dict setObject:@"webViewDidFinishLoad" forKey:@"message"];
-    [self sendMessage:dict];
+    [_channel invokeMethod:@"finishLoad" arguments:dict];
 }
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setObject:[NSNumber numberWithInt:500] forKey:@"code"];
     [dict setObject:@"didFailLoadWithError" forKey:@"message"];
-    [self sendMessage:dict];
+    [_channel invokeMethod:@"finishLoad" arguments:dict];
 }
 
 
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)results{
     if ([[call method] isEqualToString:@"load"]) {
     }
-}
-
--(void)sendMessage:(NSDictionary *)dict{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        // UI更新代码
-        [self->_channel invokeMethod:@"ios" arguments:dict];
-    });
 }
 
 

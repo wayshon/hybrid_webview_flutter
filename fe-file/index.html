@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<title>webview hybird</title>
+
+<head>
+    <style>
+        body {
+            height: 100%;
+            background-color: pink;
+        }
+    </style>
+    <script>
+        var num = 0;
+        function show(str) {
+            document.querySelector('#show').innerHTML = `Flutter 传来的值: ${str}`;
+            OCObj.call('jsCallback', ['I callback from JS']);
+        }
+        function jsCallFlutter() {
+            OCObj.call('jsCallFlutter', [`I from js: ${Math.random() * 10}`], function (sum) {
+                document.querySelector('#result').innerText = `flutter 回调的结果: ${num + sum}`;
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <section>
+        <button onclick="jsCallFlutter()">js 调用 Flutter</button>
+        <h3 class="result"></h3>
+    </section>
+    <section>
+        <h3 class="show"></h3>
+    </section>
+</body>
+
+</html>

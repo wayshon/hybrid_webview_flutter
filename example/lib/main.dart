@@ -16,30 +16,61 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   HybridWebview webView;
+  final GlobalKey<HybridWebviewState> _globalKey = GlobalKey();
+
+  String jsValue = '';
+  String jaCallback = '';
 
   @override
   void initState() {
     super.initState();
-    webView = HybridWebview(url: 'https://m.baidu.com');
+    webView = new HybridWebview(
+        key: _globalKey,
+        url: 'https://m.baidu.com',
+        callback: (String method, dynamic content) {
+          if (method == 'jsCallFlutter') {
+            setState(() {
+              jsValue = content;
+            });
+            _globalKey.currentState.channel
+                .invokeMethod('flutterCallback', 'I callback from Flutter');
+          }
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Container(
-            color: Colors.blueGrey,
-            child: Center(
-              child: Container(
-                width: 200,
-                height: 400,
-                child: webView,
-              ),
-            )),
-      ),
+          appBar: AppBar(
+            title: const Text('Plugin example app'),
+          ),
+          body: Container(
+              color: Colors.blueGrey,
+              child: Column(
+                children: <Widget>[
+                  Text(jsValue),
+                  RaisedButton(
+                    child: Text("call js"),
+                    onPressed: () async {
+                      String fromJS = await _globalKey.currentState.channel
+                          .invokeMethod('flutterCallJs', [
+                        'I from Flutter: ${new DateTime.now().millisecondsSinceEpoch}'
+                      ]);
+                      setState(() {
+                        jaCallback = fromJS;
+                      });
+                    },
+                  ),
+                  Center(
+                    child: Container(
+                      width: 200,
+                      height: 400,
+                      child: webView,
+                    ),
+                  )
+                ],
+              ))),
     );
   }
 }

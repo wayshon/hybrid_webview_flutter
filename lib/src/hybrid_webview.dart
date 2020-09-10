@@ -9,13 +9,14 @@ class HybridWebview extends StatefulWidget {
   // 加载的网页 URL
   final String url;
   // 来自 webview 的消息
-  final Function(int code, String message, dynamic content) callback;
+  final Function(String method, dynamic content) callback;
 
   HybridWebview({
+    Key key,
     //webview 加载网页链接
     @required this.url,
     this.callback,
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => new HybridWebviewState();
@@ -23,6 +24,10 @@ class HybridWebview extends StatefulWidget {
 
 class HybridWebviewState extends State<HybridWebview> {
   MethodChannel _channel;
+
+  MethodChannel get channel {
+    return _channel ?? null;
+  }
 
   @override
   void initState() {
@@ -59,7 +64,7 @@ class HybridWebviewState extends State<HybridWebview> {
       onPlatformViewCreated: (id) {
         print("onPlatformViewCreated " + id.toString());
         //创建通道
-        _channel = new MethodChannel('com.flutter_to_native_webview_$id');
+        _channel = new MethodChannel('com.calcbit.hybridWebview_$id');
         //设置监听
         nativeMessageListener();
       },
@@ -68,19 +73,19 @@ class HybridWebviewState extends State<HybridWebview> {
 
   void nativeMessageListener() async {
     _channel.setMethodCallHandler((resultCall) {
-      //处理原生 Android iOS 发送过来的消息
+      //处理 iOS 发送过来的消息
       MethodCall call = resultCall;
-      //String method = call.method;
+      String method = call.method;
       Map arguments = call.arguments;
 
       int code = arguments["code"];
       String message = arguments["message"];
       dynamic content = arguments["content"];
       print(
-          'code: ${code.toString()}; message: ${message.toString()}; content: ${content.toString()}');
+          'method: ${method.toString()}; code: ${code.toString()}; message: ${message.toString()}; content: ${content.toString()}');
 
       if (widget.callback != null) {
-        widget.callback(code, message, content);
+        widget.callback(method, content);
       }
     });
   }
