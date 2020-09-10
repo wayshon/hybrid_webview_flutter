@@ -26,7 +26,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     webView = new HybridWebview(
         key: _globalKey,
-        url: 'https://m.baidu.com',
+        url:
+            'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) {
           if (method == 'jsCallFlutter') {
             setState(() {

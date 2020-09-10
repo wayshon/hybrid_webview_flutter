@@ -48,6 +48,12 @@
         [_webView loadRequest:request];
         
 //        js 注入与回调 block
+        _context[@"jsCallFlutter"] = ^(JSValue *values) {
+            NSLog(@"%@ ===========", values);
+        };
+        _context[@"jsCallback"] = ^(JSValue *values) {
+            
+        };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
         };
