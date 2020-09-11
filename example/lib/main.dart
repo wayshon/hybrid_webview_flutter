@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     webView = new HybridWebview(
         key: _globalKey,
+        // url: 'https://m.baidu.com',
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) {
@@ -54,13 +55,13 @@ class _MyAppState extends State<MyApp> {
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
-                      String fromJS = await _globalKey.currentState.channel
+                      List results = await _globalKey.currentState.channel
                           .invokeMethod('flutterCallJs', [
                         'flutter: ${new DateTime.now().millisecondsSinceEpoch}',
                         'from Flutter'
                       ]);
                       setState(() {
-                        jsCallback = fromJS;
+                        jsCallback = results.toString();
                       });
                     },
                   ),

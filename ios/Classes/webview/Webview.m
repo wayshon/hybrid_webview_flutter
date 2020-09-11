@@ -87,8 +87,9 @@
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result{
     if ([[call method] isEqualToString:@"flutterCallJs"]) {
         [_context[@"flutterCallJs"] callWithArguments:@[call.arguments, ^(JSValue *value) {
-            NSString *content = [NSString stringWithFormat:@"%@", value];
-            result(content);
+            NSArray *arr = [value toArray];
+            NSLog(@"%@ ============", arr);
+            result(arr);
         }]];
     }
 }
