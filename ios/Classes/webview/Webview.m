@@ -48,8 +48,13 @@
         [_webView loadRequest:request];
         
 //        js 注入与回调 block
-        _context[@"jsCallFlutter"] = ^(JSValue *values) {
-            NSLog(@"%@ ===========", values);
+        _context[@"jsCallFlutter"] = ^(JSValue *value) {
+            NSArray *arr = [value toArray];
+            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+            [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
+            [dict setObject:@"jsCallFlutter" forKey:@"message"];
+            [dict setObject:arr[0] forKey:@"content"];
+            [self->_channel invokeMethod:@"finishLoad" arguments:dict];
         };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
@@ -88,7 +93,6 @@
     if ([[call method] isEqualToString:@"flutterCallJs"]) {
         [_context[@"flutterCallJs"] callWithArguments:@[call.arguments, ^(JSValue *value) {
             NSArray *arr = [value toArray];
-            NSLog(@"%@ ============", arr);
             result(arr);
         }]];
     }

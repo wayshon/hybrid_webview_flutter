@@ -1,8 +1,9 @@
 import 'dart:io';
 
-// import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 
 @immutable
 class HybridWebview extends StatefulWidget {
@@ -68,6 +69,11 @@ class HybridWebviewState extends State<HybridWebview> {
         //设置监听
         nativeMessageListener();
       },
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+        new Factory<OneSequenceGestureRecognizer>(
+          () => new EagerGestureRecognizer(),
+        ),
+      ].toSet(),
     );
   }
 
