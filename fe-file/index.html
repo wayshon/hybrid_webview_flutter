@@ -15,18 +15,18 @@
             document.querySelector('#show').innerHTML = `Flutter 传来的值: ${params.toString()}`;
             callback(['js callback', 'from JS']);
         }
-        function jsCallFlutter() {
+        function call() {
+            alert(666);
             jsCallFlutter([`js: ${Math.random() * 10}`, 'from JS'], function (params) {
                 document.querySelector('#result').innerText = `flutter 回调的结果: ${params.toString()}`;
             });
-            alert(666);
         }
     </script>
 </head>
 
 <body>
     <section>
-        <button onclick="jsCallFlutter()">js 调用 Flutter</button>
+        <button onclick="call()">js 调用 Flutter</button>
         <h3 id="result"></h3>
     </section>
     <section>
