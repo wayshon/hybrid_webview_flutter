@@ -54,7 +54,7 @@
             [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
             [dict setObject:@"jsCallFlutter" forKey:@"message"];
             [dict setObject:arr[0] forKey:@"content"];
-            [self->_channel invokeMethod:@"finishLoad" arguments:dict];
+            [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
         };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
