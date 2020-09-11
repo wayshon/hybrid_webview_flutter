@@ -56,9 +56,9 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () async {
                       String fromJS = await _globalKey.currentState.channel
                           .invokeMethod('flutterCallJs', [
-                        'I from Flutter: ${new DateTime.now().millisecondsSinceEpoch}'
+                        'flutter: ${new DateTime.now().millisecondsSinceEpoch}',
+                        'from Flutter'
                       ]);
-                      print('fromJS ==========   $fromJS');
                       setState(() {
                         jsCallback = fromJS;
                       });
