@@ -10,7 +10,7 @@ class HybridWebview extends StatefulWidget {
   // 加载的网页 URL
   final String url;
   // 来自 webview 的消息
-  final Function(String method, dynamic content) callback;
+  final Future<dynamic> Function(String method, dynamic content) callback;
 
   HybridWebview({
     Key key,
@@ -78,7 +78,7 @@ class HybridWebviewState extends State<HybridWebview> {
   }
 
   void nativeMessageListener() async {
-    _channel.setMethodCallHandler((resultCall) {
+    _channel.setMethodCallHandler((resultCall) async {
       //处理 iOS 发送过来的消息
       MethodCall call = resultCall;
       String method = call.method;
@@ -91,7 +91,8 @@ class HybridWebviewState extends State<HybridWebview> {
           'method: ${method.toString()}; code: ${code.toString()}; message: ${message.toString()}; content: ${content.toString()}');
 
       if (widget.callback != null) {
-        widget.callback(method, content);
+        final results = await widget.callback(method, content);
+        return results;
       }
     });
   }

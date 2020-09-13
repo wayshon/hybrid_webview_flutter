@@ -48,18 +48,6 @@
         NSString *url = [dic valueForKey:@"url"];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
         [_webView loadRequest:request];
-        
-//        js 注入与回调 block
-//        _context[@"jsCallFlutter"] = ^(JSValue *value) {
-//            NSArray *arr = [value toArray];
-//            id callback = [arr lastObject];
-//            [callback callWithArguments:@[@"aaa", @"bbb"]];
-//            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-//            [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
-//            [dict setObject:@"jsCallFlutter" forKey:@"message"];
-//            [dict setObject:arr[0] forKey:@"content"];
-//            [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
-//        };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
         };
@@ -109,13 +97,14 @@
 
 #pragma mark - jsExport
 - (void)jsCallFlutter:(JSValue *)params callback:(JSValue *)callback {
-    [callback callWithArguments:@[@"aaa", @"bbb"]];
     NSArray *arr = [params toArray];
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
     [dict setObject:@"jsCallFlutter" forKey:@"message"];
     [dict setObject:arr forKey:@"content"];
-    [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
+    [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict result:^(id  _Nullable result) {
+        [callback callWithArguments:result];
+    }];
 }
 
 

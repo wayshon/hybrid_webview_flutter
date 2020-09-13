@@ -29,14 +29,14 @@ class _MyAppState extends State<MyApp> {
         // url: 'https://m.baidu.com',
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
-        callback: (String method, dynamic content) {
+        callback: (String method, dynamic content) async {
           if (method == 'jsCallFlutter') {
             setState(() {
               jsResult = content.toString();
             });
-            _globalKey.currentState.channel
-                .invokeMethod('flutterCallback', 'I callback from Flutter');
+            return ['I callback from Flutter', true, 666];
           }
+          return null;
         });
   }
 
