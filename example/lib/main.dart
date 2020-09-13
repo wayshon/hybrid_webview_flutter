@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
         callback: (String method, dynamic content) {
           if (method == 'jsCallFlutter') {
             setState(() {
-              jsResult = content;
+              jsResult = content.toString();
             });
             _globalKey.currentState.channel
                 .invokeMethod('flutterCallback', 'I callback from Flutter');
