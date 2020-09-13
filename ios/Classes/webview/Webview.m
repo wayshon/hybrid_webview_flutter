@@ -7,7 +7,7 @@
 
 #import "Webview.h"
 
-@interface Webview() <UIWebViewDelegate,UIScrollViewDelegate>
+@interface Webview() <JSExportProtocol,UIWebViewDelegate,UIScrollViewDelegate>
 
 @end
 
@@ -110,10 +110,11 @@
 #pragma mark - jsExport
 - (void)jsCallFlutter:(JSValue *)params with:(JSValue *)callback {
     [callback callWithArguments:@[@"aaa", @"bbb"]];
+    NSArray *arr = [params toArray];
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
     [dict setObject:@"jsCallFlutter" forKey:@"message"];
-    [dict setObject:params forKey:@"content"];
+    [dict setObject:arr forKey:@"content"];
     [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
 }
 
