@@ -16,7 +16,7 @@
             callback(['js callback', 'from JS']);
         }
         function call() {
-            jsCallFlutter([`js: ${Math.random() * 10}`, 'from JS'], function (params) {
+            jsCallFlutter(`js: ${Math.random() * 10}`, 'from JS', function (params) {
                 document.querySelector('#result').innerText = `flutter 回调的结果: ${params.toString()}`;
             });
         }
