@@ -7,7 +7,6 @@
 
 #import "Webview.h"
 
-#import <JavaScriptCore/JavaScriptCore.h>
 @interface Webview() <UIWebViewDelegate,UIScrollViewDelegate>
 
 @end
@@ -41,6 +40,9 @@
             NSLog(@"exception:%@",exception);
         };
         
+        //将obj添加到context中
+        _context[@"OCObj"] = self;
+        
         //接收 初始化参数
         NSDictionary *dic = args;
         NSString *url = [dic valueForKey:@"url"];
@@ -48,14 +50,16 @@
         [_webView loadRequest:request];
         
 //        js 注入与回调 block
-        _context[@"jsCallFlutter"] = ^(JSValue *value) {
-            NSArray *arr = [value toArray];
-            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-            [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
-            [dict setObject:@"jsCallFlutter" forKey:@"message"];
-            [dict setObject:arr[0] forKey:@"content"];
-            [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
-        };
+//        _context[@"jsCallFlutter"] = ^(JSValue *value) {
+//            NSArray *arr = [value toArray];
+//            id callback = [arr lastObject];
+//            [callback callWithArguments:@[@"aaa", @"bbb"]];
+//            NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//            [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
+//            [dict setObject:@"jsCallFlutter" forKey:@"message"];
+//            [dict setObject:arr[0] forKey:@"content"];
+//            [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
+//        };
         _context[@"callOCOnLoad"] = ^() {
             NSLog(@"window onload ========================== ");
         };
@@ -101,6 +105,16 @@
 
 - (nonnull UIView *)view {
     return _webView;
+}
+
+#pragma mark - jsExport
+- (void)jsCallFlutter:(JSValue *)params with:(JSValue *)callback {
+    [callback callWithArguments:@[@"aaa", @"bbb"]];
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
+    [dict setObject:@"jsCallFlutter" forKey:@"message"];
+    [dict setObject:params forKey:@"content"];
+    [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict];
 }
 
 

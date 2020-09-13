@@ -7,9 +7,18 @@
 
 #import <Foundation/Foundation.h>
 #import <Flutter/Flutter.h>
+#import <JavaScriptCore/JavaScriptCore.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
+
+//定义一个JSExport protocol
+@protocol JSExportProtocol <JSExport>
+
+//TODO: 枚举可传递的参数
+JSExportAs(jsCallFlutter, - (void)jsCallFlutter:(JSValue *)params with:(JSValue *)callback);
+
+@end
 
 @interface Webview : NSObject<FlutterPlatformView>
 
