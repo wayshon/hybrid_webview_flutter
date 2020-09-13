@@ -16,8 +16,7 @@
             callback(['js callback', 'from JS']);
         }
         function call() {
-            OCObj.jsCallFlutter([`js: ${Math.random() * 10}`, 'from JS'], function (params) {
-                alert(JSON.stringify(params));
+            OCObj.jsCallFlutter([`js: ${Math.random() * 10}`, 'from JS'], function (...params) {
                 document.querySelector('#result').innerText = `flutter 回调的结果: ${JSON.stringify(params)}`;
             });
         }

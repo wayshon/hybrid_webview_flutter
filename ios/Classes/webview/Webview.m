@@ -108,7 +108,7 @@
 }
 
 #pragma mark - jsExport
-- (void)jsCallFlutter:(JSValue *)params with:(JSValue *)callback {
+- (void)jsCallFlutter:(JSValue *)params callback:(JSValue *)callback {
     [callback callWithArguments:@[@"aaa", @"bbb"]];
     NSArray *arr = [params toArray];
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
