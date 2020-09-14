@@ -26,15 +26,15 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     webView = new HybridWebview(
         key: _globalKey,
-        // url: 'https://m.baidu.com',
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) async {
-          if (method == 'jsCallFlutter') {
+          if (method == 'getWidgetHeight') {
             setState(() {
-              jsResult = content.toString();
+              // jsResult = content.toString();
+              jsResult = 'hahahahaha';
             });
-            return ['I callback from Flutter', true, 666];
+            return [context.size.height];
           }
           return null;
         });
@@ -56,10 +56,8 @@ class _MyAppState extends State<MyApp> {
                     child: Text("call js"),
                     onPressed: () async {
                       List results = await _globalKey.currentState.channel
-                          .invokeMethod('flutterCallJs', [
-                        'flutter: ${new DateTime.now().millisecondsSinceEpoch}',
-                        'from Flutter'
-                      ]);
+                          .invokeMethod(
+                              '__flutterCallJs', ['getUserAgent', 'flutter']);
                       setState(() {
                         jsCallback = results.toString();
                       });

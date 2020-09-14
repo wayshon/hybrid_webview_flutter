@@ -20,6 +20,7 @@
     BOOL htmlImageIsClick;
     NSMutableArray* mImageUrlArray;
     JSContext *_context;
+    NSString *_bridgeJSString;
 }
 
 -(instancetype)initWithWithFrame:(CGRect)frame viewIdentifier:(int64_t)viewId arguments:(id)args binaryMessenger:(NSObject<FlutterBinaryMessenger> *)messenger{
@@ -41,7 +42,10 @@
         };
         
         //将obj添加到context中
-        _context[@"OCObj"] = self;
+        _context[@"__OCObj"] = self;
+        
+        _bridgeJSString = [self getBridgeJS];
+        NSLog(@"%@", _bridgeJSString);
         
         //接收 初始化参数
         NSDictionary *dic = args;
@@ -67,23 +71,24 @@
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView{
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
-    [dict setObject:@"webViewDidFinishLoad" forKey:@"message"];
-    [_channel invokeMethod:@"finishLoad" arguments:dict];
+    [_context evaluateScript:_bridgeJSString];
 }
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    [dict setObject:[NSNumber numberWithInt:500] forKey:@"code"];
-    [dict setObject:@"didFailLoadWithError" forKey:@"message"];
-    [_channel invokeMethod:@"finishLoad" arguments:dict];
+    [_context evaluateScript:_bridgeJSString];
 }
 
 
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result{
-    if ([[call method] isEqualToString:@"flutterCallJs"]) {
-        [_context[@"flutterCallJs"] callWithArguments:@[call.arguments, ^(JSValue *value) {
+    if ([[call method] isEqualToString:@"__flutterCallJs"]) {
+        NSString *action = [call.arguments firstObject];
+        NSArray *params;
+        if ([call.arguments count] > 1) {
+            params = [call.arguments subarrayWithRange:NSMakeRange(1, [call.arguments count] -1)];
+        } else {
+            params = @[];
+        }
+        [_context[@"__flutterCallJs"] callWithArguments:@[action, params, ^(JSValue *value) {
             NSArray *arr = [value toArray];
             result(arr);
         }]];
@@ -95,14 +100,17 @@
     return _webView;
 }
 
+- (NSString *)getBridgeJS {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"js/bridge.js" ofType:nil];
+    NSString *jsString = [[NSString alloc]initWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+    return jsString;
+}
+
 #pragma mark - jsExport
-- (void)jsCallFlutter:(JSValue *)params callback:(JSValue *)callback {
+- (void)jsCallFlutter:(JSValue *)action params:(JSValue *)params callback:(JSValue *)callback {
+    NSString *actionName = [NSString stringWithFormat:@"%@", action];
     NSArray *arr = [params toArray];
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    [dict setObject:[NSNumber numberWithInt:200] forKey:@"code"];
-    [dict setObject:@"jsCallFlutter" forKey:@"message"];
-    [dict setObject:arr forKey:@"content"];
-    [self->_channel invokeMethod:@"jsCallFlutter" arguments:dict result:^(id  _Nullable result) {
+    [self->_channel invokeMethod:actionName arguments:arr result:^(id  _Nullable result) {
         [callback callWithArguments:result];
     }];
 }

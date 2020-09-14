@@ -80,18 +80,14 @@ class HybridWebviewState extends State<HybridWebview> {
   void nativeMessageListener() async {
     _channel.setMethodCallHandler((resultCall) async {
       //处理 iOS 发送过来的消息
-      MethodCall call = resultCall;
-      String method = call.method;
-      Map arguments = call.arguments;
+      String method = resultCall.method;
+      Map arguments = resultCall.arguments;
 
-      int code = arguments["code"];
-      String message = arguments["message"];
-      dynamic content = arguments["content"];
       print(
-          'method: ${method.toString()}; code: ${code.toString()}; message: ${message.toString()}; content: ${content.toString()}');
+          'method: ${method.toString()}; arguments: ${arguments.toString()};');
 
       if (widget.callback != null) {
-        final results = await widget.callback(method, content);
+        final results = await widget.callback(method, arguments);
         return results;
       }
     });

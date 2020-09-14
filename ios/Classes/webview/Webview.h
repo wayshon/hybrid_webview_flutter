@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol JSExportProtocol <JSExport>
 
 //TODO: 枚举可传递的参数
-JSExportAs(jsCallFlutter, - (void)jsCallFlutter:(JSValue *)params callback:(JSValue *)callback);
+JSExportAs(jsCallFlutter, - (void)jsCallFlutter:(JSValue *)action params:(JSValue *)params callback:(JSValue *)callback);
 
 @end
 
