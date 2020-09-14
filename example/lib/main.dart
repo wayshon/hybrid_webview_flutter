@@ -55,19 +55,10 @@ class _MyAppState extends State<MyApp> {
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
-                      List list = ['a', 6];
-                      Map map = {'a': 1, 2: 'b'};
-                      Set s = Set.from(['b']);
-
                       List results = await _globalKey.currentState.channel
                           .invokeMethod('flutterCallJs', [
-                        true,
-                        666,
-                        2.33,
-                        'from flutter',
-                        list,
-                        map,
-                        null
+                        'flutter: ${new DateTime.now().millisecondsSinceEpoch}',
+                        'from Flutter'
                       ]);
                       setState(() {
                         jsCallback = results.toString();
