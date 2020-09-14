@@ -31,6 +31,9 @@ class _MyAppState extends State<MyApp> {
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) async {
           if (method == 'jsCallFlutter') {
+            final obj = content[2];
+            print('=============== ${obj}');
+            print('=============== ${obj is Map}');
             setState(() {
               jsResult = content.toString();
             });
