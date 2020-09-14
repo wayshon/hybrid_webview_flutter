@@ -32,8 +32,10 @@ class _MyAppState extends State<MyApp> {
         callback: (String method, dynamic content) async {
           if (method == 'jsCallFlutter') {
             final obj = content[2];
+            final arr = content[3];
             print('=============== ${obj}');
             print('=============== ${obj is Map}');
+            print('=============== ${arr is List}');
             setState(() {
               jsResult = content.toString();
             });
