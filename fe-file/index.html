@@ -12,7 +12,7 @@
     </style>
     <script>
         function flutterCallJs(params, callback) {
-            document.querySelector('#show').innerHTML = `Flutter 传来的值: ${JSON.stringify(params[5])} ${typeof params[6]}`;
+            document.querySelector('#show').innerHTML = `Flutter 传来的值: ${params[5][2]} ${params[5].a} ${typeof params[6]}`;
             callback(['js callback', true, 'from JS']);
         }
         function call() {
