@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
             final arr = content[3];
             print('=============== ${obj}');
             print('=============== ${obj is Map}');
-            print('=============== ${arr is List}');
+            print('=============== ${arr is Set}');
             setState(() {
               jsResult = content.toString();
             });
