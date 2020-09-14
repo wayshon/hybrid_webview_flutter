@@ -31,11 +31,6 @@ class _MyAppState extends State<MyApp> {
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) async {
           if (method == 'jsCallFlutter') {
-            final obj = content[2];
-            final arr = content[3];
-            print('=============== ${obj}');
-            print('=============== ${obj is Map}');
-            print('=============== ${arr is Set}');
             setState(() {
               jsResult = content.toString();
             });
@@ -60,10 +55,19 @@ class _MyAppState extends State<MyApp> {
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
+                      List list = ['a', 6];
+                      Map map = {'a': 1, 2: 'b'};
+                      Set s = Set.from(['b']);
+
                       List results = await _globalKey.currentState.channel
                           .invokeMethod('flutterCallJs', [
-                        'flutter: ${new DateTime.now().millisecondsSinceEpoch}',
-                        'from Flutter'
+                        true,
+                        666,
+                        2.33,
+                        'from flutter',
+                        list,
+                        map,
+                        null
                       ]);
                       setState(() {
                         jsCallback = results.toString();
