@@ -15,7 +15,7 @@ class Bridge {
     static share(value) {
         return new Promise((resolve, reject)  => {
             try {
-                __jsCallFlutter('share', value, result => resolve(result));
+                __jsCallFlutter('share', [value], result => resolve(result));
             } catch (e) {
                 reject(e);
             }
@@ -24,7 +24,7 @@ class Bridge {
     static exchangeHeight(height) {
         return new Promise((resolve, reject)  => {
             try {
-                __jsCallFlutter('getWidgetHeight', height, result => resolve(result));
+                __jsCallFlutter('exchangeHeight', [height], result => resolve(result));
             } catch (e) {
                 reject(e);
             }

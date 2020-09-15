@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         callback: (String method, dynamic content) async {
-          if (method == 'getWidgetHeight') {
+          if (method == 'exchangeHeight') {
             setState(() {
               jsResult = 'webview clientHeight: $content';
             });
