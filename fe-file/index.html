@@ -10,6 +10,7 @@
             background-color: pink;
         }
     </style>
+    <script src="./js/bridge.js"></script>
     <script>
         function call() {
             Bridge.getWidgetHeight().then(height => document.querySelector('#show').innerHTML=height);

@@ -44,9 +44,6 @@
         //将obj添加到context中
         _context[@"__OCObj"] = self;
         
-        _bridgeJSString = [self getBridgeJS];
-        NSLog(@"%@", _bridgeJSString);
-        
         //接收 初始化参数
         NSDictionary *dic = args;
         NSString *url = [dic valueForKey:@"url"];
@@ -71,11 +68,11 @@
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView{
-    [_context evaluateScript:_bridgeJSString];
+    [_channel invokeMethod:@"finishLoad" arguments:nil];
 }
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
-    [_context evaluateScript:_bridgeJSString];
+    [_channel invokeMethod:@"finishLoad" arguments:error];
 }
 
 
@@ -98,12 +95,6 @@
 
 - (nonnull UIView *)view {
     return _webView;
-}
-
-- (NSString *)getBridgeJS {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"js/bridge.js" ofType:nil];
-    NSString *jsString = [[NSString alloc]initWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    return jsString;
 }
 
 #pragma mark - jsExport
