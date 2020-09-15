@@ -31,8 +31,7 @@ class _MyAppState extends State<MyApp> {
         callback: (String method, dynamic content) async {
           if (method == 'getWidgetHeight') {
             setState(() {
-              // jsResult = content.toString();
-              jsResult = 'hahahahaha';
+              jsResult = 'webview clientHeight: $content';
             });
             return [context.size.height];
           }

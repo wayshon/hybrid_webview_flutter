@@ -13,7 +13,7 @@
     <script src="./js/bridge.js"></script>
     <script>
         function call() {
-            Bridge.getWidgetHeight().then(height => document.querySelector('#show').innerHTML=height);
+            Bridge.getWidgetHeight(document.documentElement.clientHeight).then(height => document.querySelector('#show').innerHTML = `widget height: ${height}`);
         }
     </script>
 </head>

@@ -21,10 +21,10 @@ class Bridge {
             }
         });
     }
-    static getWidgetHeight() {
+    static exchangeHeight(height) {
         return new Promise((resolve, reject)  => {
             try {
-                __jsCallFlutter('getWidgetHeight', null, result => resolve(result));
+                __jsCallFlutter('getWidgetHeight', height, result => resolve(result));
             } catch (e) {
                 reject(e);
             }

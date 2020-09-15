@@ -72,7 +72,7 @@
 }
 
 -(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
-    [_channel invokeMethod:@"finishLoad" arguments:error];
+    [_channel invokeMethod:@"failLoad" arguments:error];
 }
 
 
