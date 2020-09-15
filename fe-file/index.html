@@ -17,7 +17,7 @@
             Bridge.exchangeHeight(height).then(
                 (error, result) => {
                     if (error) {
-                        alert(Object.prototype.toString.call(error));
+                        alert(error);
                         return;
                     }
                     document.querySelector('#show').innerHTML = `widget height: ${result}`

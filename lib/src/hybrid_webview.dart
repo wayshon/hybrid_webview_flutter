@@ -81,15 +81,15 @@ class HybridWebviewState extends State<HybridWebview> {
     _channel.setMethodCallHandler((resultCall) async {
       //处理 iOS 发送过来的消息
       String method = resultCall.method;
-      Map arguments = resultCall.arguments;
+      List arguments = resultCall.arguments;
 
       print(
           'method: ${method.toString()}; arguments: ${arguments.toString()};');
 
-      // if (widget.callback != null) {
-      //   final results = await widget.callback(method, arguments);
-      //   return results;
-      // }
+      if (widget.callback != null) {
+        final results = await widget.callback(method, arguments);
+        return results;
+      }
     });
   }
 }

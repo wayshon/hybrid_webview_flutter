@@ -68,6 +68,7 @@ function __flutterCallJs(action, params, callback) {
 function __jsCallFlutter(action, params, cb) {
     validateParam(params);
     __OCObj.jsCallFlutter(action, params, (error, results) => {
+        alert(results);
         cb(error, results);
     });
 }
