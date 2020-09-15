@@ -50,8 +50,9 @@ function validateParam(param) {
         for (const k in param) {
             validateParam(param[k]);
         }
+    } else {
+        throw new TypeError(`param only supply null,undefined,number,boolean,string,array/object;value is ${param}`);
     }
-    throw new TypeError('param only supply null,undefined,number,boolean,string,array/object');
 }
 
 function __flutterCallJs(action, params, callback) {
