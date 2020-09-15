@@ -13,7 +13,16 @@
     <script src="./js/bridge.js"></script>
     <script>
         function call() {
-            Bridge.exchangeHeight(document.documentElement.clientHeight).then(height => document.querySelector('#show').innerHTML = `widget height: ${height}`);
+            const height = document.documentElement.clientHeight;
+            Bridge.exchangeHeight(height).then(
+                (error, result) => {
+                    if (error) {
+                        alert(error);
+                        return;
+                    }
+                    document.querySelector('#show').innerHTML = `widget height: ${result}`
+                }
+            );
         }
     </script>
 </head>
