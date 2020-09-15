@@ -5,18 +5,50 @@ import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 
+void validateParam(dynamic param) {
+  if (param == null ||
+      param is bool ||
+      param is int ||
+      param is double ||
+      param is String) {
+    return;
+  }
+  if (param is List) {
+    for (var v in param) {
+      validateParam(v);
+    }
+  } else if (param is Map) {
+    List keys = param.keys.toList();
+    for (var k in keys) {
+      if (!(k is String)) {
+        throw Error.safeToString('map key must string;key: $k');
+      }
+      validateParam(param[k]);
+    }
+  } else {
+    throw Error.safeToString(
+        'param only supply null,int,double,bool,string,list/map;value is $param');
+  }
+}
+
 @immutable
 class HybridWebview extends StatefulWidget {
+  // Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) {
+  //   return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
+  // }
+
   // 加载的网页 URL
   final String url;
   // 来自 webview 的消息
-  final Future<dynamic> Function(String method, dynamic content) callback;
+  final Future<dynamic> Function(String method, dynamic content) bridgeListener;
+
+  Future<dynamic> Function(String method, [dynamic arguments]) invokeMethod;
 
   HybridWebview({
     Key key,
     //webview 加载网页链接
     @required this.url,
-    this.callback,
+    this.bridgeListener,
   }) : super(key: key);
 
   @override
@@ -33,6 +65,15 @@ class HybridWebviewState extends State<HybridWebview> {
   @override
   void initState() {
     super.initState();
+    widget.invokeMethod = (String method, [dynamic arguments]) {
+      try {
+        validateParam(arguments);
+      } catch (e) {
+        print(e);
+        return;
+      }
+      _channel.invokeMethod(method, arguments);
+    };
   }
 
   @override
@@ -79,16 +120,24 @@ class HybridWebviewState extends State<HybridWebview> {
 
   void nativeMessageListener() async {
     _channel.setMethodCallHandler((resultCall) async {
-      //处理 iOS 发送过来的消息
       String method = resultCall.method;
       List arguments = resultCall.arguments;
 
       print(
           'method: ${method.toString()}; arguments: ${arguments.toString()};');
 
-      if (widget.callback != null) {
-        final results = await widget.callback(method, arguments);
-        return results;
+      if (widget.bridgeListener != null) {
+        dynamic results = await widget.bridgeListener(method, arguments);
+        try {
+          validateParam(results);
+        } catch (e) {
+          print(e);
+          results = null;
+        }
+        if (!results || results is List) {
+          return results;
+        }
+        return [results];
       }
     });
   }

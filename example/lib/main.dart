@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
-import 'package:hybrid_webview_flutter/hybrid_webview_flutter.dart';
 import 'package:hybrid_webview_flutter/src/hybrid_webview.dart';
 
 void main() {
@@ -28,15 +24,17 @@ class _MyAppState extends State<MyApp> {
         key: _globalKey,
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
-        callback: (String method, dynamic content) async {
-          if (method == 'exchangeHeight') {
-            setState(() {
-              jsResult = 'webview clientHeight: ${content[0]}';
-            });
-            return [context.size.height, 666, 777];
-          }
-          return null;
-        });
+        bridgeListener: this.bridgeListener);
+  }
+
+  Future<dynamic> bridgeListener(String method, dynamic content) async {
+    if (method == 'exchangeHeight') {
+      setState(() {
+        jsResult = 'webview clientHeight: ${content[0]}';
+      });
+      return context.size.height;
+    }
+    return Future.value(null);
   }
 
   @override
@@ -54,9 +52,11 @@ class _MyAppState extends State<MyApp> {
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
-                      List results = await _globalKey.currentState.channel
-                          .invokeMethod(
-                              '__flutterCallJs', ['getUserAgent', 'flutter']);
+                      // List results = await _globalKey.currentState.channel
+                      //     .invokeMethod(
+                      //         '__flutterCallJs', ['getUserAgent', 'flutter']);
+                      List results = await webView.invokeMethod(
+                          '__flutterCallJs', ['getUserAgent', 'flutter']);
                       setState(() {
                         jsCallback = results.toString();
                       });
