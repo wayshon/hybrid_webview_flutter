@@ -101,11 +101,17 @@
 - (void)jsCallFlutter:(JSValue *)action params:(JSValue *)params callback:(JSValue *)callback {
     NSString *actionName = [NSString stringWithFormat:@"%@", action];
     NSArray *arr = [params toArray];
-    [self->_channel invokeMethod:actionName arguments:arr result:^(id  _Nullable result) {
+    [self->_channel invokeMethod:actionName arguments:@{@"content": arr} result:^(id  _Nullable result) {
         if ([result isKindOfClass:[NSClassFromString(@"FlutterError") class]]) {
             [callback callWithArguments:@[[result valueForKey:@"_message"], [NSNull null]]];
         } else {
-            [callback callWithArguments:@[[NSNull null], result]];
+            id results;
+            if (result) {
+                results = result;
+            } else {
+                results = [NSNull null];
+            }
+            [callback callWithArguments:@[[NSNull null], results]];
         }
     }];
 }
