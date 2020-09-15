@@ -31,9 +31,9 @@ class _MyAppState extends State<MyApp> {
         callback: (String method, dynamic content) async {
           if (method == 'exchangeHeight') {
             setState(() {
-              jsResult = 'webview clientHeight: ${content[0]}';
+              jsResult = 'webview clientHeight';
             });
-            return [context.size.height];
+            return null;
           }
           return null;
         });

@@ -86,10 +86,10 @@ class HybridWebviewState extends State<HybridWebview> {
       print(
           'method: ${method.toString()}; arguments: ${arguments.toString()};');
 
-      if (widget.callback != null) {
-        final results = await widget.callback(method, arguments);
-        return results;
-      }
+      // if (widget.callback != null) {
+      //   final results = await widget.callback(method, arguments);
+      //   return results;
+      // }
     });
   }
 }

@@ -14,7 +14,7 @@
     <script>
         function call() {
             const height = document.documentElement.clientHeight;
-            Bridge.exchangeHeight(height).then(
+            Bridge.exchangeHeight(`${height}`).then(
                 (error, result) => {
                     if (error) {
                         alert(error);

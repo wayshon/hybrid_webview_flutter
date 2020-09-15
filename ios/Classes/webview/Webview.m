@@ -102,12 +102,11 @@
     NSString *actionName = [NSString stringWithFormat:@"%@", action];
     NSArray *arr = [params toArray];
     [self->_channel invokeMethod:actionName arguments:arr result:^(id  _Nullable result) {
-        id error;
         if ([result isKindOfClass:[NSClassFromString(@"FlutterError") class]]) {
-            NSLog(@"--------- %@", [result valueForKey:@"_message"]);
-            error = [result valueForKey:@"_message"];
+            [callback callWithArguments:@[[result valueForKey:@"_message"], [NSNull null]]];
+        } else {
+            [callback callWithArguments:@[[NSNull null], result]];
         }
-        [callback callWithArguments:@[error, result]];
     }];
 }
 
