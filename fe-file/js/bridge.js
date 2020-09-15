@@ -15,7 +15,13 @@ class Bridge {
     static share(value) {
         return new Promise((resolve, reject)  => {
             try {
-                __jsCallFlutter('share', [value], result => resolve(result));
+                __jsCallFlutter('share', [value], (error, results) => {
+                    if (error) {
+                        reject(new Error(error));
+                    } else {
+                        resolve(results);
+                    }
+                });
             } catch (e) {
                 reject(e);
             }
@@ -24,7 +30,13 @@ class Bridge {
     static exchangeHeight(height) {
         return new Promise((resolve, reject)  => {
             try {
-                __jsCallFlutter('exchangeHeight', [height], result => resolve(result));
+                __jsCallFlutter('exchangeHeight', [height], (error, results) => {
+                    if (error) {
+                        reject(new Error(error));
+                    } else {
+                        resolve(results);
+                    }
+                });
             } catch (e) {
                 reject(e);
             }
@@ -67,8 +79,5 @@ function __flutterCallJs(action, params, callback) {
 
 function __jsCallFlutter(action, params, cb) {
     validateParam(params);
-    __OCObj.jsCallFlutter(action, params, (error, results) => {
-        alert(results);
-        cb(error, results);
-    });
+    __OCObj.jsCallFlutter(action, params, cb);
 }
