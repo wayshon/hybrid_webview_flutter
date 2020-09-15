@@ -21,6 +21,7 @@
     NSMutableArray* mImageUrlArray;
     JSContext *_context;
     NSString *_bridgeJSString;
+    int _lastPosition;
 }
 
 -(instancetype)initWithWithFrame:(CGRect)frame viewIdentifier:(int64_t)viewId arguments:(id)args binaryMessenger:(NSObject<FlutterBinaryMessenger> *)messenger{
@@ -45,14 +46,18 @@
         _context[@"__OCObj"] = self;
         
         //接收 初始化参数
-        NSDictionary *dic = args;
-        NSString *url = [dic valueForKey:@"url"];
+        NSString *url = [args valueForKey:@"url"];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
         [_webView loadRequest:request];
-        _context[@"callOCOnLoad"] = ^() {
-            NSLog(@"window onload ========================== ");
+        _context[@"console"][@"log"] = ^(JSValue * msg) {
+            NSLog(@"H5  log : %@", msg);
         };
-        [_context evaluateScript:@"window.onload = function(){callOCOnLoad()}"];
+        _context[@"console"][@"warn"] = ^(JSValue * msg) {
+            NSLog(@"H5  warn : %@", msg);
+        };
+        _context[@"console"][@"error"] = ^(JSValue * msg) {
+            NSLog(@"H5  error : %@", msg);
+        };
         
         // 注册flutter 与 ios 通信通道
         NSString* channelName = [NSString stringWithFormat:@"com.calcbit.hybridWebview_%lld", viewId];
@@ -64,17 +69,11 @@
         
     }
     return self;
-    
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView{
-    [_channel invokeMethod:@"finishLoad" arguments:nil];
+- (nonnull UIView *)view {
+    return _webView;
 }
-
--(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
-    [_channel invokeMethod:@"failLoad" arguments:error];
-}
-
 
 -(void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result{
     if ([[call method] isEqualToString:@"__flutterCallJs"]) {
@@ -92,9 +91,64 @@
     }
 }
 
+#pragma mark - webView delegate
+- (void)webViewDidStartLoad:(UIWebView *)webView{
+    [_channel invokeMethod:@"webViewDidStartLoad" arguments:nil];
+}
 
-- (nonnull UIView *)view {
-    return _webView;
+- (void)webViewDidFinishLoad:(UIWebView *)webView{
+    [_channel invokeMethod:@"webViewDidFinishLoad" arguments:nil];
+}
+
+-(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
+    [_channel invokeMethod:@"didFailLoadWithError" arguments:error.localizedDescription];
+}
+
+#pragma mark - scrollView delegate
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [_channel invokeMethod:@"scrollViewWillBeginDragging" arguments:nil];
+}
+
+// 结束
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    [_channel invokeMethod:@"scrollViewDidEndDragging" arguments:@[@(decelerate)]];
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    int currentPostion = scrollView.contentOffset.y;
+    if (currentPostion - _lastPosition > 25) {
+        _lastPosition = currentPostion;
+        [_channel invokeMethod:@"scrollForwardTop" arguments:@[@(_lastPosition)]];
+    }
+    else if (_lastPosition - currentPostion > 25) {
+        _lastPosition = currentPostion;
+        [_channel invokeMethod:@"scrollForwardBottom" arguments:@[@(_lastPosition)]];
+    }
+}
+
+
+-(void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)conOffset{
+    
+    if (velocity.y > 0.0f) {
+        //不在顶部
+        CGPoint offset = scrollView.contentOffset;
+        CGRect bounds = scrollView.bounds;
+        CGSize size = scrollView.contentSize;
+        UIEdgeInsets inset = scrollView.contentInset;
+        CGFloat currentOffset = offset.y + bounds.size.height - inset.bottom;
+        CGFloat maximumOffset = size.height;
+//        currentOffset = maximumOffset，scrollview已经到底
+        if(currentOffset >= maximumOffset){
+            [_channel invokeMethod:@"scrollArriveBottom" arguments:@[@(currentOffset)]];
+        }
+    }else if (velocity.y < - 0.0f ){
+        //在顶部
+        [_channel invokeMethod:@"scrollArriveTop" arguments:nil];
+    }else{
+        //在中间
+    }
+    
 }
 
 #pragma mark - jsExport

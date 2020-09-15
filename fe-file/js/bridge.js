@@ -6,7 +6,7 @@ class __Bridge {
      * @param {(s:string) => void} callback 
      */
     static getUserAgent(prifix, callback) {
-        callback(`${prifix}_${window.navigator.userAgent}`);
+        callback([`${prifix}_${window.navigator.userAgent}`]);
     }
 }
 

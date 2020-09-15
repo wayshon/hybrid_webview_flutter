@@ -33,6 +33,24 @@ class _MyAppState extends State<MyApp> {
         jsResult = 'webview clientHeight: ${content[0]}';
       });
       return context.size.height;
+    } else if (method == 'webViewDidStartLoad') {
+      print('webViewDidStartLoad === ');
+    } else if (method == 'webViewDidFinishLoad') {
+      print('webViewDidFinishLoad === ');
+    } else if (method == 'didFailLoadWithError') {
+      print('didFailLoadWithError === $content');
+    } else if (method == 'scrollViewWillBeginDragging') {
+      print('scrollViewWillBeginDragging === ');
+    } else if (method == 'scrollViewDidEndDragging') {
+      print('scrollViewDidEndDragging === $content');
+    } else if (method == 'scrollForwardTop') {
+      print('scrollForwardTop === $content');
+    } else if (method == 'scrollForwardBottom') {
+      print('scrollForwardBottom === $content');
+    } else if (method == 'scrollArriveBottom') {
+      print('scrollArriveBottom === $content');
+    } else if (method == 'scrollArriveTop') {
+      print('scrollArriveBottom === ');
     }
     return Future.value(null);
   }
