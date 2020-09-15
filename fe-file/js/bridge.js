@@ -34,7 +34,7 @@ class Bridge {
                     if (error) {
                         reject(new Error(error));
                     } else {
-                        resolve(results);
+                        resolve(results[0]);
                     }
                 });
             } catch (e) {
