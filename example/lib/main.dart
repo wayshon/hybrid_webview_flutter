@@ -12,7 +12,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   HybridWebview webView;
-  final GlobalKey<HybridWebviewState> _globalKey = GlobalKey();
 
   String jsResult = '';
   String jsCallback = '';
@@ -21,8 +20,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     webView = new HybridWebview(
-        key: _globalKey,
-        // url: 'https://m.baidu.com',
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         bridgeListener: this.bridgeListener);
@@ -71,13 +68,10 @@ class _MyAppState extends State<MyApp> {
                   RaisedButton(
                     child: Text("call js"),
                     onPressed: () async {
-                      // List results = await _globalKey.currentState.channel
-                      //     .invokeMethod(
-                      //         '__flutterCallJs', ['getUserAgent', 'flutter']);
                       List results =
                           await webView.invokeMethod('getUserAgent', 'flutter');
                       setState(() {
-                        jsCallback = results.toString();
+                        jsCallback = results[0];
                       });
                     },
                   ),
