@@ -68,13 +68,13 @@ function validateParam(param) {
 }
 
 function __flutterCallJs(action, params, callback) {
-    console.log('__flutterCallJs -- ', action, ' -- ', params);
+    console.log(`__flutterCallJs -- ${action} -- ${params.toString()}`);
     const cb = (params) => {
         validateParam(params);
         callback(params);
     }
-    if (Bridge[action]) {
-        Bridge[action](params, cb);
+    if (__Bridge[action]) {
+        __Bridge[action](params, cb);
     }
 }
 
