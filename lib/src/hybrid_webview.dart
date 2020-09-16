@@ -33,10 +33,6 @@ void validateParam(dynamic param) {
 
 @immutable
 class HybridWebview extends StatefulWidget {
-  // Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) {
-  //   return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
-  // }
-
   // 加载的网页 URL
   final String url;
   // 来自 webview 的消息
@@ -70,9 +66,15 @@ class HybridWebviewState extends State<HybridWebview> {
         validateParam(arguments);
       } catch (e) {
         print(e);
-        return;
+        return null;
       }
-      _channel.invokeMethod(method, arguments);
+      List params = [method];
+      if (arguments is List) {
+        params.addAll(arguments);
+      } else if (arguments != null) {
+        params.add(arguments);
+      }
+      return _channel.invokeMethod('__flutterCallJs', params);
     };
   }
 
@@ -134,7 +136,7 @@ class HybridWebviewState extends State<HybridWebview> {
           print(e);
           results = null;
         }
-        if (!results || results is List) {
+        if (results == null || results is List) {
           return results;
         }
         return [results];

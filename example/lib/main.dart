@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     webView = new HybridWebview(
         key: _globalKey,
+        // url: 'https://m.baidu.com',
         url:
             'https://calcbit.com/resource/flutter/hybrid_webview_flutter/fe-file/index.html',
         bridgeListener: this.bridgeListener);
@@ -50,9 +51,9 @@ class _MyAppState extends State<MyApp> {
     } else if (method == 'scrollArriveBottom') {
       print('scrollArriveBottom === $content');
     } else if (method == 'scrollArriveTop') {
-      print('scrollArriveBottom === ');
+      print('scrollArriveTop === ');
     }
-    return Future.value(null);
+    return null;
   }
 
   @override
@@ -73,8 +74,8 @@ class _MyAppState extends State<MyApp> {
                       // List results = await _globalKey.currentState.channel
                       //     .invokeMethod(
                       //         '__flutterCallJs', ['getUserAgent', 'flutter']);
-                      List results = await webView.invokeMethod(
-                          '__flutterCallJs', ['getUserAgent', 'flutter']);
+                      List results =
+                          await webView.invokeMethod('getUserAgent', 'flutter');
                       setState(() {
                         jsCallback = results.toString();
                       });

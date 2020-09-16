@@ -68,6 +68,7 @@ function validateParam(param) {
 }
 
 function __flutterCallJs(action, params, callback) {
+    console.log('__flutterCallJs -- ', action, ' -- ', params);
     const cb = (params) => {
         validateParam(params);
         callback(params);

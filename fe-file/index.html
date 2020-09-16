@@ -15,7 +15,7 @@
         function call() {
             const height = document.documentElement.clientHeight;
             Bridge.exchangeHeight(height).then(
-                (result) => document.querySelector('#show').innerHTML = `widget height: ${results}`
+                (result) => document.querySelector('#show').innerHTML = `widget height: ${result}`
             ).catch(e => alert(e.message));
         }
     </script>
