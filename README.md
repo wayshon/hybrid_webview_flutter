@@ -116,10 +116,19 @@ Native 调 flutter 的消息名不固定是因为我们能够经常修改 flutte
         } else {
             params = @[];
         }
-        [_context[@"__flutterCallJs"] callWithArguments:@[action, params, ^(JSValue *value) {
-            NSArray *arr = [value toArray];
-            result(arr);
-        }]];
+        //  在主线程更新 webview，不然会崩
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_context[@"__flutterCallJs"] callWithArguments:@[action, params, ^(JSValue *value) {
+                NSArray *arr = [value toArray];
+                result(arr);
+            }]];
+        });
+    } else if ([[call method] isEqualToString:@"evaluateJavaScript"]) {
+        // 注入 js
+        NSString* jsString = [call arguments];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_webView stringByEvaluatingJavaScriptFromString:jsString];
+        });
     }
 }
 ```
@@ -141,6 +150,8 @@ Set不能传会报错，map 的 key 必须为 string，不然 flutter 传给 OC 
 JSContext 执行 `__flutterCallJs` 透传 flutter 传过来的参数，并多传一个 block 参数，block 在 js 里会变成函数，js 侧调用这个函数类似 callback
 
 OC 的 block 接收到 js 执行的回调，调用 FlutterResult，将回调结果返回给 flutter
+
+除了获取 js context 执行 js，webview 常见的还有注入 js，可以接收 flutter 传来的 js string 注入到 webview
 
 ##### js 调用 native
 1、JSContext 直接注入 bolck，js 调用这个函数
@@ -185,7 +196,10 @@ OC 通过 FlutterMethodChannel 调用 flutter 获得返回值后通过这个 blo
             } else {
                 results = [NSNull null];
             }
-            [callback callWithArguments:@[[NSNull null], results]];
+            //  在主线程更新 webview
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [callback callWithArguments:@[[NSNull null], results]];
+            });
         }
     }];
 }
@@ -193,7 +207,7 @@ OC 通过 FlutterMethodChannel 调用 flutter 获得返回值后通过这个 blo
 
 经实践，限制 js 传给 OC 的值为 boolean, number, string, array, obj, null/undefined
 
-null/undefined 都会转成 null，fn/set/map都会在OC变成空字典 {}
+null/undefined 都会转成 null，fn/set/map都会在OC变成空字典 {}，{1: 'a'} 到了 OC key 也会转成 string
 
 ### 注意事项
 

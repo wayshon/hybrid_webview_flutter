@@ -84,10 +84,19 @@
         } else {
             params = @[];
         }
-        [_context[@"__flutterCallJs"] callWithArguments:@[action, params, ^(JSValue *value) {
-            NSArray *arr = [value toArray];
-            result(arr);
-        }]];
+        //  在主线程更新 webview，不然会崩
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_context[@"__flutterCallJs"] callWithArguments:@[action, params, ^(JSValue *value) {
+                NSArray *arr = [value toArray];
+                result(arr);
+            }]];
+        });
+    } else if ([[call method] isEqualToString:@"evaluateJavaScript"]) {
+        // 注入 js
+        NSString* jsString = [call arguments];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_webView stringByEvaluatingJavaScriptFromString:jsString];
+        });
     }
 }
 
@@ -139,7 +148,10 @@
             } else {
                 results = [NSNull null];
             }
-            [callback callWithArguments:@[[NSNull null], results]];
+            //  在主线程更新 webview
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [callback callWithArguments:@[[NSNull null], results]];
+            });
         }
     }];
 }

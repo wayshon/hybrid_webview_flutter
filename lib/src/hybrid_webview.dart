@@ -36,8 +36,10 @@ class HybridWebview extends StatefulWidget {
   final String url;
   // 来自 webview 的消息
   final Future<dynamic> Function(String method, dynamic content) bridgeListener;
-  // 调用 native
+  // 调用 js
   Future<dynamic> Function(String method, [dynamic arguments]) invokeMethod;
+  // 给 webview 注入 js
+  Future<dynamic> Function(String javaScript) injectionJavaScript;
 
   HybridWebview({
     Key key,
@@ -75,6 +77,9 @@ class HybridWebviewState extends State<HybridWebview> {
       }
       return _channel.invokeMethod('__flutterCallJs', params);
     };
+    widget.injectionJavaScript = (String javaScript) {
+      return _channel.invokeMethod('evaluateJavaScript', javaScript);
+    };
   }
 
   @override
@@ -107,11 +112,11 @@ class HybridWebviewState extends State<HybridWebview> {
         //设置监听
         nativeMessageListener();
       },
-      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-        new Factory<OneSequenceGestureRecognizer>(
-          () => new EagerGestureRecognizer(),
-        ),
-      ].toSet(),
+      // gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+      //   new Factory<OneSequenceGestureRecognizer>(
+      //     () => new EagerGestureRecognizer(),
+      //   ),
+      // ].toSet(),
     );
   }
 
