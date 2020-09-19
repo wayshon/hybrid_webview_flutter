@@ -288,4 +288,12 @@ NSDictionary *cookieHeaderDic = [NSHTTPCookie requestHeaderFieldsWithCookies:[[N
 [_webView stringByEvaluatingJavaScriptFromString:jsStr];
 ```
 
+### 实践应用
+WebView 控制 flutter 导航栏右侧 BarButtonItem
 
+- js 传递配置数组给 flutter，将 callback 存储 js
+- flutter 根据配置渲染 AppBar actions，设置点击回调将按钮类型回传 js
+- js 根据 flutter 传过来的值调用之前缓存的 callback，调用结果返回给 flutter
+
+![](./readme-images/demo1.png)
+![](./readme-images/demo2.png)

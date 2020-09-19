@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<head>
+    <title>webview hybird</title>
+    <style>
+        body {
+            height: 100%;
+            background-color: grey;
+        }
+    </style>
+    <script src="./js/bridge.js"></script>
+    <script>
+        const configs = [
+            {
+                icon: 'list',
+                callback: () => {
+                    alert('list-bar callback')
+                },
+            },
+        ];
+        Bridge.setRightBarItems(configs).catch(e => alert(e.message));
+
+
+        function changeItems() {
+            try {
+                configs.push({
+                    icon: 'scanner',
+                    callback:  () => {
+                        alert('scanner-bar callback')
+                    },
+                });
+                Bridge.setRightBarItems(configs).catch(e => alert(e.message));
+            } catch(e) {
+                alert(e.message)
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <section>
+        <button onclick="changeItems()">修改 bar items</button>
+    </section>
+</body>
+
+</html>

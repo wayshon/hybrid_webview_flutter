@@ -8,7 +8,18 @@ class __Bridge {
     static getUserAgent(prifix, callback) {
         callback([`${prifix}_${window.navigator.userAgent}`]);
     }
+
+    static barItemCallback(action, callback) {
+        if (__Bridge.barItemCallbackMap[action]) {
+            __Bridge.barItemCallbackMap[action]();
+            callback([true]);
+        } else {
+            callback([false]);
+        }
+    }
 }
+
+__Bridge.barItemCallbackMap = {};
 
 // js 调用 flutter
 class Bridge {
@@ -35,6 +46,27 @@ class Bridge {
                         reject(new Error(error));
                     } else {
                         resolve(results[0]);
+                    }
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+    static setRightBarItems(configs) {
+        __Bridge.barItemCallbackMap = {};
+        const params = [];
+        for (const { icon, callback } of configs) {
+            __Bridge.barItemCallbackMap[`${icon}`] = callback;
+            params.push({ icon });
+        }
+        return new Promise((resolve, reject)  => {
+            try {
+                __jsCallFlutter('setRightBarItems', params, (error, results) => {
+                    if (error) {
+                        reject(new Error(error));
+                    } else {
+                        resolve();
                     }
                 });
             } catch (e) {

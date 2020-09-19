@@ -112,11 +112,11 @@ class HybridWebviewState extends State<HybridWebview> {
         //设置监听
         nativeMessageListener();
       },
-      // gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-      //   new Factory<OneSequenceGestureRecognizer>(
-      //     () => new EagerGestureRecognizer(),
-      //   ),
-      // ].toSet(),
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+        new Factory<OneSequenceGestureRecognizer>(
+          () => new EagerGestureRecognizer(),
+        ),
+      ].toSet(),
     );
   }
 
