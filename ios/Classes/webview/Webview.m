@@ -34,6 +34,10 @@
         _webView.scrollView.delegate = self;
         _viewId = viewId;
         
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        //注册、接收通知
+        [center addObserver:self selector:@selector(cookieChange:)name:@"cookieChange"object:nil];
+        
         //创建context
         _context = [_webView valueForKeyPath:@"documentView.webView.mainFrame.javaScriptContext"];
         //设置异常处理
@@ -98,6 +102,16 @@
             [self->_webView stringByEvaluatingJavaScriptFromString:jsString];
         });
     }
+}
+
+#pragma mark - set cookie
+- (void)cookieChange: (NSNotification *)notification {
+    NSString *name = [notification.userInfo valueForKey:@"Name"];
+    NSString *value = [notification.userInfo valueForKey:@"Value"];
+    NSDate *date = [notification.userInfo valueForKey:@"Expires"];
+    long exp = [date timeIntervalSince1970] * 1000;
+    NSString *jsStr = [NSString stringWithFormat:@"document.cookie='%@=%@;expires=%ld'",name,value,exp];
+    [_webView stringByEvaluatingJavaScriptFromString:jsStr];
 }
 
 #pragma mark - webView delegate

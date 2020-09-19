@@ -18,16 +18,29 @@
                 (result) => document.querySelector('#show').innerHTML = `widget height: ${result}`
             ).catch(e => alert(e.message));
         }
+
+        function testSession() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://calcbit.com/session-test/", true);
+            xhr.send();
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    document.querySelector('#session_show').innerHTML = xhr.responseText;
+                }
+            }
+        }
     </script>
 </head>
 
 <body>
     <section>
+        <button onclick="testSession()">session test</button>
         <button onclick="call()">js 调用 Flutter</button>
         <h3 id="result"></h3>
     </section>
     <section>
         <h3 id="show"></h3>
+        <h3 id="session_show"></h3>
     </section>
 </body>
 

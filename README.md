@@ -209,7 +209,83 @@ OC 通过 FlutterMethodChannel 调用 flutter 获得返回值后通过这个 blo
 
 null/undefined 都会转成 null，fn/set/map都会在OC变成空字典 {}，{1: 'a'} 到了 OC key 也会转成 string
 
-### 注意事项
+#### cookie 共享
+webView/OC，RN/OC cookie 都是共享的。但是 flutter 比较奇怪，用过的 dart:io 与 [dio](https://pub.flutter-io.cn/packages/dio) 都不自动带上cookie，查看了 [dio_cookie_manager](https://pub.flutter-io.cn/packages/dio_cookie_manager) 与 [cookie_jar](https://pub.flutter-io.cn/packages/cookie_jar) 的实现，发现 dio 是利用这两个库自己在 dart 维护了 cookie 信息，然后添加到 dio.interceptors 里，随 request 带上，监听 response 存储。
 
-##### gestureRecognizers
+```dart
+// dio & dio_cookie_manager 代码
+Future onRequest(RequestOptions options) async {
+    var cookies = cookieJar.loadForRequest(options.uri);
+    cookies.removeWhere((cookie) {
+      if (cookie.expires != null) {
+        return cookie.expires.isBefore(DateTime.now());
+      }
+      return false;
+    });
+    String cookie = getCookies(cookies);
+    if (cookie.isNotEmpty) options.headers[HttpHeaders.cookieHeader] = cookie;
+  }
+  @override
+  Future onResponse(Response response) async => _saveCookies(response);
+  _saveCookies(Response response) {
+    if (response != null && response.headers != null) {
+      List<String> cookies = response.headers[HttpHeaders.setCookieHeader];
+      if (cookies != null) {
+        cookieJar.saveFromResponse(
+          response.request.uri,
+          cookies.map((str) => Cookie.fromSetCookieValue(str)).toList(),
+        );
+      }
+    }
+  }
+```
+
+由于这种实现相当于把 response 的 cookie 维护在 dart 层面，所以 OC 的请求就不会有这些信息，webView 环境也不会有。
+
+然后？与其将 cookie 信息维护在 dart，为什么不直接维护在 OC，那样OC/webView的请求还能带上。
+
+##### 方案
+- OC 与 webView 的 cookie 是互通的，不用手动处理
+- dart req/res 调用 MethodChannel 读/存 cookie
+- OC 存 cookie 至 NSHTTPCookieStorage，并同步至 webView 的 document.cookie
+
+##### 实现
+1、 dart 存取 cookie 存到 OC
+
+```dart
+  // 存
+  static Future<bool> setCookie({ String domain, String name, String value, int exp }) async {
+    bool result = await _channel.invokeMethod('setCookie', [domain, name, value, exp]);
+    return result;
+  }
+  // 取
+  static Future<List<Map>> getCookie(String url) async {
+    final List res = await _channel.invokeMethod('getCookie', url);
+    List<Map> listMap = new List<Map>.from(res);
+    return listMap;
+  }
+```
+
+2、OC 存取 dart 传过来的值，并在 OC 发送请求时带上这些 cookie
+
+```Objective-C
+// 读 cookie
+NSArray *cookieArray = [NSArray arrayWithArray:[[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies]];
+
+// 存 cookie
+NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:cookieProperties];
+[[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+
+// 请求带上 cookie
+NSDictionary *cookieHeaderDic = [NSHTTPCookie requestHeaderFieldsWithCookies:[[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies]];
+[request setValue:[cookieHeaderDic objectForKey:@"Cookie"] forHTTPHeaderField:@"Cookie"];
+```
+
+3、OC 接收到 dart 传过来的 cookie 时顺带将 cookie 写入 webView
+
+```Objective-C
+ NSString *jsStr = [NSString stringWithFormat:@"document.cookie='%@=%@;expires=%ld'",name,value,exp];
+[_webView stringByEvaluatingJavaScriptFromString:jsStr];
+```
+
 
