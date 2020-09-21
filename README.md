@@ -1,8 +1,13 @@
-# hybrid_webview_flutter
+# 基于Flutter的Hybrid Webview容器实践
 
 ### 背景
+Flutter 是一个 UI 框架，实际开发中除了常见的 widget 还需要如地图、webview等 Native 组件。
 
-flutter 中嵌入 webview，并且这个 webview 能够与 flutter 通信
+一种方法是 Flutter 通知 Native 唤起 Native 界面，如之前的[扫码插件](https://github.com/wayshon/scan_flutter_ios)。缺点是 Native 组件很难和 Flutter 组件进行组合。
+
+第二种是通过 Flutter 提供的 PlatformView(AndroidView/UIKitView) 将 Native 组件嵌入到 Flutter的组件树。使 Flutter 能够像控制普通 widget 那样控制 Native 组件。
+
+**目标: Flutter 中嵌入 webview widget，这个 webview 需要受 flutter 控制，且能够与 flutter 通信。**
 
 ### 思路
 
@@ -11,13 +16,6 @@ flutter 中嵌入 webview，并且这个 webview 能够与 flutter 通信
 ### 具体实现
 
 #### target 1: 实现 webview 插件
-Flutter 是一个 UI 框架，实际开发中除了常见的 widget 还需要如地图、webview等 Native 组件。
-
-一种方法是 Flutter 通知 Native 唤起 Native 界面，如之前的[扫码插件](https://github.com/wayshon/scan_flutter_ios)。缺点是 Native 组件很难和 Flutter 组件进行组合。
-
-第二种是通过 Flutter 提供的 PlatformView(AndroidView/UIKitView) 将 Native 组件嵌入到 Flutter的组件树。使 Flutter 能够像控制普通 widget 那样控制 Native 组件。
-
-#### 步骤
 1、创建插件:
 
 ```
@@ -25,7 +23,7 @@ flutter create -i objc --template=plugin hybrid_webview_flutter
 ```
 自动生成 HybridWebviewFlutterPlugin 类，打开 Runner.xcworkspace
 
-2、在 info.flist 添加 io.flutter.embedded_views_preview: YES。不配置这行就没法使用 PlatformView
+2、在 info.flist 添加 io.flutter.embedded_views_preview: YES。PlatformView 功能默认关闭，不配置这行就没法使用
 ![](./readme-images/infoplist.png)
 
 3、创建 webview 类，实现 FlutterPlatformView 协议，在构造函数里获取 flutter 传递过来的参数，创建 webview，创建 FlutterMethodChannel 并设置 block 回调。
@@ -209,7 +207,7 @@ OC 通过 FlutterMethodChannel 调用 flutter 获得返回值后通过这个 blo
 
 null/undefined 都会转成 null，fn/set/map都会在OC变成空字典 {}，{1: 'a'} 到了 OC key 也会转成 string
 
-#### cookie 共享
+#### target 4: cookie 共享
 webView/OC，RN/OC cookie 都是共享的。但是 flutter 比较奇怪，用过的 dart:io 与 [dio](https://pub.flutter-io.cn/packages/dio) 都不自动带上cookie，查看了 [dio_cookie_manager](https://pub.flutter-io.cn/packages/dio_cookie_manager) 与 [cookie_jar](https://pub.flutter-io.cn/packages/cookie_jar) 的实现，发现 dio 是利用这两个库自己在 dart 维护了 cookie 信息，然后添加到 dio.interceptors 里，随 request 带上，监听 response 存储。
 
 ```dart
@@ -242,7 +240,10 @@ Future onRequest(RequestOptions options) async {
 
 由于这种实现相当于把 response 的 cookie 维护在 dart 层面，所以 OC 的请求就不会有这些信息，webView 环境也不会有。
 
-然后？与其将 cookie 信息维护在 dart，为什么不直接维护在 OC，那样OC/webView的请求还能带上。
+然后？  
+![](./readme-images/why.png)
+
+与其将 cookie 信息维护在 dart，为什么不直接维护在 OC，那样OC/webView的请求还能带上。
 
 ##### 方案
 - OC 与 webView 的 cookie 是互通的，不用手动处理
@@ -291,9 +292,46 @@ NSDictionary *cookieHeaderDic = [NSHTTPCookie requestHeaderFieldsWithCookies:[[N
 ### 实践应用
 WebView 控制 flutter 导航栏右侧 BarButtonItem
 
-- js 传递配置数组给 flutter，将 callback 存储 js
+- js 传递配置数组给 flutter，将 callback 存储在 js
 - flutter 根据配置渲染 AppBar actions，设置点击回调将按钮类型回传 js
 - js 根据 flutter 传过来的值调用之前缓存的 callback，调用结果返回给 flutter
 
 ![](./readme-images/demo1.png)
 ![](./readme-images/demo2.png)
+
+### 写在最后
+Flutter 里跑 webview 显然不是明智的做法，flutter 官方默认都关闭 PlatformView 功能。  
+相对于 hybrid 和 RN 只有 JSC 通信，这里的 webview 又多了一层 flutter 通信。  
+
+但是特殊场景下也不是不可以这么玩。类似在 RN / 小程序 里跑webview，在小程序里套 webview 减小包体积，避开审核快速迭代的做法不在少数。
+
+也有在微信小程序里利用 miniprograme.navigateTo 触发app.pageNotFound 做 IOC 的，虽然慢了点绕了点，但是提高了开发效率与迭代速度。
+
+![](./readme-images/ok.png)  
+**Anyway, Keep Balance.**
+
+#### 题外话 - 作为页面仔我们做跨端的优劣势
+<del>怕被砖，先声明以下为纯扯淡内容</del>  
+![](./readme-images/chiliu.png)
+###### 优势
+- 快，一次开发到处跑，对比安卓一堆机型一堆特殊 api，固定 webview 内核简直美滋滋
+- 快，hotreload爽的不行
+- 快，增量热更新绕过审核
+- 快，开发体验，MVVM，声明式开发加上组件库简直拼积木，iOS 命令式开发连尾灯都看不到
+- 快，CSS 牛逼，Android 还得整 xml，iOS 更是惨到手写代码布局
+- 快，开发环境简单，node / web 一把梭，native 一堆奇奇怪怪的配置
+
+###### 劣势
+- 慢，能力限制在 webview 的环境里，webview 限制了上限，扩展功能需要 native 排期施舍
+- 慢，单线程，渲染还会互斥，仰仗 native 帮忙分拆逻辑线程和UI线程进行优化
+- 慢，JIT 干不过 AOT
+- 慢，渲染干不过 native，多了层中间商 webview 赚差价，无限列表 webview 连 native 的尾灯都看不到
+  - native 渲染: view -> layout -> renderNode -> 合成 -> GPU渲染
+  - webview: html -> dom tree -> render tree -> render layer -> 合成 -> gpu渲染
+
+PS: 听说 flutter 很强，但它并不是前端专属玩具，因为 native 上手更有优势（尤其 Android）  
+![](./readme-images/cry.png)
+
+综上，***快*** 才是我们的优势啊，钻牛角尖跟 native 比性能，何必呢。  
+![](./readme-images/smile.png)
+
